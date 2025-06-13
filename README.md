@@ -1,21 +1,13 @@
-# Build a Course Management Service with FastAPI
-Create a small web API that allows managing courses and participants.
+# Getting started
 
-## Tasks
-Design an API with the following endpoints:
-### `GET /courses`
-Returns a list of all courses.
-### `POST /courses`
-Adds a new course (e.g., with `name` and `instructor`).
-### `GET /participants`
-Returns a list of all participants.
-### `POST /participants`
-Adds a new participant and assigns them to a course.
+Run the following command in your terminal to start the application in development mode:
 
----
+```bash
+uvicorn main:app --reload
+```
 
-## 🚀 Additional Challenges
+The --reload flag enables automatic server restarts whenever you make changes to the code, perfect for development.
 
-- Input validation using **Pydantic**
-- Error handling (e.g., return a **404** if a course does not exist)
-- Store data in a simple **in-memory structure** (e.g., list or dictionary)
+Once the server is running, open your browser and navigate to: http://127.0.0.1:8000/docs
+
+Here, you can interactively explore and test all available API endpoints!
