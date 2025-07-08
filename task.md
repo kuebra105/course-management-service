@@ -22,8 +22,8 @@ Adds a new participant and assigns them to a course.
 - Extend validations (e.g., minimum length for names, course names must not be empty)
 - Filter participants by course `(GET /participants?course_id=1)`
 - Delete courses `(DELETE /courses/{id})`
-- Update course details `(PUT /courses/{id})`
+- Update course details (e.g. a course name) `(PUT /courses/{id})` 
 - Update participant info (e.g., change name, change course) `(PUT /participants/{id})`
-- Prevent duplicate course names
+- Prevent duplicate course names --> prevent duplicate course id
 - Prevent adding the same participant to a course twice
-- Add timestamps to courses/participants (e.g., created_at)
+- Add timestamps to courses/participants (e.g., created_at) first for courses, then for participants --> there is a python-methode
