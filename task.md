@@ -14,9 +14,9 @@ Adds a new participant and assigns them to a course.
 
 ## 🚀 Additional Challenges
 
-- Input validation using **Pydantic**
-- Error handling (e.g., return a **404** if a course does not exist)
-- Store data in a simple **in-memory structure** (e.g., list or dictionary)
+- Input validation using **Pydantic** --> added in class Course
+- Error handling (e.g., return a **404** if a course does not exist) --> already included
+- Store data in a simple **in-memory structure** (e.g., list or dictionary) --> already included
 
 ## Additional tasks
 - Extend validations (e.g., minimum length for names, course names must not be empty)
