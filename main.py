@@ -5,18 +5,6 @@ import time
 
 app = FastAPI() # an instance of the FastAPI application is created
 
-def get_time():
-    """
-    Returns the current date and time in the format 'Created on YYYY-mm-dd at HH:MM:SS'.
-
-    
-    Returns:
-        str: formatted timestamp
-    """
-    timestamp = time.localtime()
-    date_format = time.strftime("%Y-%m-%d", timestamp)
-    time_format = time.strftime("%H:%M:%S", timestamp)
-    return(f"Created on {date_format} at {time_format}.")
 
 # field validators: https://realpython.com/python-pydantic/#validating-models-and-fields
 # Pydantic modells
@@ -28,12 +16,19 @@ class Course(BaseModel):
         id (int): unique course ID
         name (str): name of the course (1-100 characters)
         instructor (str): name of the instructor (min. 3 characters)
-        created_at (str | None): timestamp of creation
     """
     id: int
     name: str = Field(min_length=1, max_length=100)
     instructor: str = Field(min_length=3)
-    created_at: str | None = None
+
+class Course_Output(Course):
+    """
+    Data model for a Course_Output-object.
+
+    Attributes:
+        created_at (str | None): timestamp of creation
+    """
+    created_at: str
 
 class Participant(BaseModel):
     """
@@ -43,15 +38,35 @@ class Participant(BaseModel):
         id (int): unique participant ID
         name (str): name of the participant (min. 3 characters)
         course_id (int): associated course ID
-        created_at (str | None): timestamp of creation
     """
     id: int
     name: str = Field(min_length=3)
     course_id: int
-    created_at: str | None = None
+
+class Participant_Output(Participant):
+    """
+    Data model for a Participant_Output-object.
+
+    Attributes:
+        created_at (str | None): timestamp of creation
+    """
+    created_at: str
 
 courses: list[Course] = []
 participants: list[Participant] = []
+
+
+def get_time():
+    """
+    Returns the current date and time in the format 'Created on YYYY-mm-dd at HH:MM:SS'.
+
+    Returns:
+        str: formatted timestamp
+    """
+    timestamp = time.localtime()
+    date_format = time.strftime("%Y-%m-%d", timestamp)
+    time_format = time.strftime("%H:%M:%S", timestamp)
+    return(f"Created on {date_format} at {time_format}.")
 
 
 @app.get("/courses", response_model=list[Course]) # this indicates a HTTP GET endpoint // if http://127.0.0.1:8000/courses is called, this function is executed
@@ -64,8 +79,8 @@ def get_courses() -> list[Course]:
     """
     return courses
 
-@app.post("/courses", response_model=Course) # defines an HTTP POST endpoint at /courses.
-def add_course(course: Course) -> Course:
+@app.post("/courses", response_model=Course_Output) # defines an HTTP POST endpoint at /courses. ### 
+def add_course(course: Course) -> Course_Output:
     """
     Adds a new course if the ID and name are unique.
 
@@ -73,18 +88,24 @@ def add_course(course: Course) -> Course:
         course (Course): course data
 
     Returns:
-        Course: the added course
+        Course_Output: the added Course_Output-object with timestamp
 
     Raises:
         HTTPException: if ID or name already exist
     """
-    if any(c.id == course.id for c in courses): # check duplicated ids
+    
+    if any(c.id == course.id for c in courses):
         raise HTTPException(status_code=400, detail="Course ID already exists.")
-    if any(c.name == course.name for c in courses): # check duplicated ids
+    if any(c.name == course.name for c in courses):
         raise HTTPException(status_code=400, detail="Course name already exists.")
-    course.created_at = get_time()
+    course_output = Course_Output( # a new Course_Output-object is created
+        id=course.id,
+        name=course.name,
+        instructor=course.instructor,
+        created_at=get_time()
+    )
     courses.append(course)
-    return course
+    return course_output
 
 @app.put("/courses/{course_id}", response_model=Course)
 def update_course_info(course_id: int, updated_course: Course):
@@ -144,7 +165,6 @@ def delete_course(course_id: int):
     participants.clear()
     participants.extend(updated_participants)
 
-# helper function
 def delete_participants_by_course(course_id: int):
     """
     HELPER FUNCTION: Removes all participants assigned to a specific course.
@@ -196,7 +216,7 @@ def add_participant(participant: Participant) -> Participant:
         participant (Participant): Participant data
 
     Returns:
-        Participant: the added participant
+        Participant: the added Participant_Output-object with timestamp
 
     Raises:
         HTTPException: if course does not exist or ID is already assigned
@@ -205,9 +225,14 @@ def add_participant(participant: Participant) -> Participant:
         raise HTTPException(status_code=404, detail="Course not found. Create a course in order to create participants.")
     if any(p.id == participant.id for p in participants):
         raise HTTPException(status_code=400, detail="Participant ID already exists.")
-    participant.created_at = get_time()
+    participant_output = Participant_Output( # a new Course_Output-object is created
+        id=participant.id,
+        name=participant.name,
+        course_id=participant.course_id,
+        created_at=get_time()
+    )
     participants.append(participant)
-    return participant
+    return participant_output
 
 @app.put("/participants/{participant_id}")
 def update_participant_info(participant_id: int, updated_participant: Participant):
@@ -234,7 +259,6 @@ def update_participant_info(participant_id: int, updated_participant: Participan
             return participant
 
 
-
 """
 EDITING-DOUCUMENTATION: this is how I edited the code:
 
@@ -250,4 +274,6 @@ EDITING-DOUCUMENTATION: this is how I edited the code:
 5. The functionality that a participant cannot be added more than once is already given, therefore changes were not necessary.
 6. I have set up the timestamps for the courses and participants (I don't particularly like my solution, we can revise it).
 7. I also added docstring.
+8. I  modified POST for the courses so that a Course_Output object is returned correctly.
+9. I did the same for the participants.
 """
